@@ -1,0 +1,1 @@
+powercfg -import c:\PowerConfig\WorkstationTest.pow

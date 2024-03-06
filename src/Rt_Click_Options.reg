@@ -1,0 +1,16 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\DesktopBackground\Shell\Restart Computer]
+"icon"="shell32.dll,-221"
+"Position"="Bottom"
+
+[HKEY_CLASSES_ROOT\DesktopBackground\Shell\Shutdown Computer]
+"icon"="shell32.dll,-329"
+"Position"="Bottom"
+
+[HKEY_CLASSES_ROOT\DesktopBackground\Shell\Restart Computer\command]
+@="shutdown.exe -r -t 00 -f"
+
+[HKEY_CLASSES_ROOT\DesktopBackground\Shell\Shutdown Computer\command]
+@="shutdown.exe -s -t 00 -f"
+
