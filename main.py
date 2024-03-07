@@ -16,7 +16,9 @@ result = subprocess.run(
 )
 output_lines = result.stdout.strip().splitlines()
 if output_lines:
-    print("#1 - YB found in device manager !! Please check the problematic devices:")
+    print(
+        "#1 - YB found in device manager!! Please look into the problematic device(s):"
+    )
     for line in output_lines:
         print(line)
     while True:
@@ -30,7 +32,8 @@ if output_lines:
 else:
     print("#1 - Ensure no YB found in device manager [Complete]")
 
-# TODO: Check Intel DPTF support (#2)
+
+# Check Intel DPTF support (#2)
 result = subprocess.run(
     ["wmic", "cpu", "get", "caption"],
     stdout=subprocess.PIPE,
@@ -40,7 +43,25 @@ cpu_arch = result.stdout.strip()
 if "AMD64" in cpu_arch:
     print("#2 - Skip checking Intel DPTF on AMD platform [Complete]")
 if "Intel64" in cpu_arch:
-    print("#2 - Disable Intel DPTF [Complete]")
+    result = subprocess.run(
+        [
+            "powershell",
+            "-command",
+            "(Get-PnpDevice) | Where-Object { $_.FriendlyName -like '*Intel(R) Dynamic Tuning*' }",
+        ],
+        stdout=subprocess.PIPE,
+        text=True,
+    )
+    output_string = result.stdout.strip()
+    if "Unknown" in output_string:
+        print(
+            "#2 - Intel DPTF is supported but NOT enabled!! Please enter BIOS to enable it"
+        )
+        sys.exit()
+    if "OK" in output_string:
+        print("#2 - Intel DPTF is already enabled [Complete]")
+    else:
+        print("#2 - Intel DPTF is not supported on this platform [Complete]")
 
 
 # TODO: Get the chassis type and set corresponding power plan (#3)
@@ -51,12 +72,12 @@ result = subprocess.run(
 )
 chassis_type = result.stdout.strip()
 if "{10}" in chassis_type:  # Notebook
-    print("This is a Notebook")
+    print("#3 - This is a Notebook")
 else:  # Desktop/AIO
-    print("This is not a Notebook")
+    print("#3 - This is NOT a Notebook")
 
 
-# TODO: Turn off Wi-Fi and turn on airplane mode (#4)  need reboot
+# TODO: Turn off Wi-Fi and turn on airplane mode (#4)  *Reboot required
 subprocess.run(  # Turn off Wi-Fi
     [
         "powershell",
@@ -65,11 +86,12 @@ subprocess.run(  # Turn off Wi-Fi
     ],
     check=True,
 )
-subprocess.run(  # Turn on airplane mode
+subprocess.run(  # Turn on airplane mode (fail)
     [
         "reg",
         "add",
-        "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\RadioManagement" "/v",
+        r"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\RadioManagement",
+        "/v",
         "SystemRadioState",
         "/t",
         "REG_DWORD",
@@ -78,6 +100,7 @@ subprocess.run(  # Turn on airplane mode
         "/f",
     ],
     check=True,
+    stdout=subprocess.DEVNULL,
 )
 print("#4 - Turn off Wi-Fi and turn on airplane mode [Complete]")
 
@@ -87,7 +110,7 @@ subprocess.run(
     [
         "reg",
         "add",
-        "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\policies\system",
+        r"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\policies\system",
         "/v",
         "EnableLUA",
         "/t",
@@ -97,19 +120,22 @@ subprocess.run(
         "/f",
     ],
     check=True,
+    stdout=subprocess.DEVNULL,
 )
-print("#5 - Disable User Account Control [Complete]")
+print("#5 - Turn off User Account Control (UAC) [Complete]")
 
 
-# Add regestry for "RT Click Options" (#6)
-reg_file_path = "./src/Rt_Click_Options.reg"
+# Add RT Click Options regestry (#6)
+reg_file_path = "./src/Rt Click Options.reg"
 try:
-    subprocess.run(["reg.exe", "import", reg_file_path], check=True)
-    print("#6 - Add regestry for 'RT Click Options' [Complete]")
-except subprocess.CalledProcessError:
-    print(
-        "#6 - Failed to add regestry for 'RT Click Options' !! Make sure the file exists"
+    subprocess.run(
+        ["reg.exe", "import", reg_file_path],
+        check=True,
+        stdout=subprocess.DEVNULL,
     )
+    print("#6 - Add 'RT Click Options' regestry [Complete]")
+except subprocess.CalledProcessError:
+    print("#6 - Failed to add 'RT Click Options' regestry!! Make sure the file exists")
     sys.exit()
 
 
@@ -122,24 +148,27 @@ if sb_state.lower() == "true":
     print("Secure boot is enabled!! Enter BIOS to disable Secure boot first")
     sys.exit()
 else:
-    subprocess.run(["bcdedit", "/set", "testsigning", "on"], check=True)
+    subprocess.run(
+        ["bcdedit", "/set", "testsigning", "on"],
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
     print("#7 - Enable test mode [Complete]")
+
 
 # Copy Power Config folder and import power scheme (#8)
 source_folder = "./src/PowerConfig"
-destination_folder = "C:\PowerConfig"
+destination_folder = "C:\\PowerConfig"
 if os.path.exists(destination_folder):
     shutil.rmtree(destination_folder)
-shutil.move(source_folder, destination_folder)
+shutil.copytree(source_folder, destination_folder)
 subprocess.run(
-    [
-        "powershell",
-        "-command",
-        "C:\PowerConfig\Install.bat",
-    ],
+    ["C:\\PowerConfig\\Install.bat"],
     check=True,
+    stdout=subprocess.DEVNULL,
 )
-print("#8 - Import power scheme in Power Config folder [Complete]")
+print("#8 - Copy PowerConfig folder and import power scheme [Complete]")
+
 
 # CHECK AC SLEEP AFTER (#10)
 print("\n(2) Checking current AC power setting for S3...")
@@ -164,6 +193,38 @@ else:
     print('>>> Sleep after on AC is NOT set to "Never"!!\n\n')
 
 
+# Unpin Edge and pin Paint/Snipping Tool to taskbar (#13)
+reg_file_path = "./src/syspin.exe"
+app_path = os.environ.get("LocalAppData")
+subprocess.run(  # Unping Edge
+    [
+        "powershell",
+        "-command",
+        "Remove-Item 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Taskband' -Recurse -Force",
+    ],
+    check=True,
+)
+subprocess.run(  # Ping Paint
+    [reg_file_path, f"{app_path}\\Microsoft\\WindowsApps\\mspaint.exe", "5386"],
+    check=True,
+    stdout=subprocess.DEVNULL,
+)
+subprocess.run(  # Ping Snipping Tool
+    [reg_file_path, f"{app_path}\\Microsoft\\WindowsApps\\SnippingTool.exe", "5386"],
+    check=True,
+    stdout=subprocess.DEVNULL,
+)
+# subprocess.run(  # Restart the Explorer
+#     [
+#         "powershell",
+#         "-command",
+#         "Stop-Process -Processname Explorer -WarningAction SilentlyContinue -ErrorAction SilentlyContinue -Force",
+#     ],
+#     check=True,
+# )
+print("#13 - Unpin Edge and pin Paint/Snipping Tool to taskbar [Complete]")
+
+
 # Set brightness level to 100% and disable adaptive brightness (# 18)
 subprocess.run(
     [
@@ -173,7 +234,6 @@ subprocess.run(
     ],
     check=True,
 )
-print("#18 - Set Brightness level to maximum [Complete]")
 subprocess.run(
     [
         "powercfg",
@@ -197,7 +257,7 @@ subprocess.run(
     check=True,
 )
 subprocess.run(["powercfg", "-SetActive", "SCHEME_CURRENT"], check=True)
-
+print("#18 - Set Brightness level to 100% and disable adaptive brightness [Complete]")
 
 # Uninstall MS Office (#18)
 # TODO: Remove MS Office 365/One Note/Teams from Installed apps
@@ -218,22 +278,7 @@ print("#19 - Uninsalled MS Office [Complete]")
 # TODO: Install .NET Framwork 3.5
 
 
-# Disable UAC prompt (# 14)  需要重開機
-subprocess.run(
-    [
-        "reg",
-        "add",
-        "HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
-        "/v",
-        "ConsentPromptBehaviorAdmin",
-        "/t",
-        "REG_DWORD",
-        "/d",
-        "0",
-        "/f",
-    ],
-    check=True,
-)
+# TODO: Disable UAC prompt (# 14)  需要重開機
 
 
 # Turn off Windows Defender Firewall (# 15)
@@ -249,10 +294,23 @@ subprocess.run(
     ["netsh", "advfirewall", "set", "publicprofile", "state", "off"],
     check=True,
 )
-print("#15 - Windows Firewall Defender disabled successfully")
+print("#15 - Disable Windows Firewall Defender [Complete]")
 
 
-# TODO: change resolution to 1920x1080 @ 100% (#17)
+# Set resolution to 1920x1080 and DPI to 100% (#17)
+res_app_path = "./src/QRes.exe"
+dpi_app_path = "./src/SetDpi.exe"
+subprocess.run(
+    [res_app_path, "/x:1920", "/y:1080"],
+    check=True,
+    stdout=subprocess.DEVNULL,
+)
+subprocess.run(
+    [dpi_app_path, "100"],
+    check=True,
+    stdout=subprocess.DEVNULL,
+)
+print("#17 - Set resolution to 1920x1080 @ 100% [Complete]")
 
 
 # # SET TIME ZONE
@@ -270,7 +328,7 @@ subprocess.run(
     [
         "reg",
         "add",
-        "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching",
+        r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching",
         "/v",
         "SearchOrderConfig",
         "/t",
@@ -280,8 +338,9 @@ subprocess.run(
         "/f",
     ],
     check=True,
+    stdout=subprocess.DEVNULL,
 )
-print("#25 - Registry key for DriverSearching is modified [Complete]")
+print("#25 - Set Registry key for DriverSearching to 0 [Complete]")
 
 # TODO: Turn off Smart app control/Reputation-based protection/Isolated browsing (#26)
 
