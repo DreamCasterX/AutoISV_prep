@@ -170,27 +170,118 @@ subprocess.run(
 print("#8 - Copy PowerConfig folder and import power scheme [Complete]")
 
 
-# CHECK AC SLEEP AFTER (#10)
-print("\n(2) Checking current AC power setting for S3...")
-scheme_guid = str(subprocess.check_output(["powercfg", "-getactivescheme"]))
-current_scheme_guid = scheme_guid[scheme_guid.index("GUID: ") :][6:42]
-# current_scheme_guid = scheme_guid[-49:-13]
-# print(scheme_guid)
-# print(current_scheme_guid)
-sub_guid = str(subprocess.check_output(["powercfg", "-aliases"]))
-sleep_guid = sub_guid[: sub_guid.index("  SUB_SLEEP")][-36:]
-# print(sleep_guid)
-output = str(
-    subprocess.check_output(["powercfg", "-query", current_scheme_guid, sleep_guid])
+# TODO: Display the full path/Show Hidden Files and uncheck Hide empty drives, uncheck Hide extensions,
+# uncheck Hide folders merge conflicts, uncheck Hide Protected OS files  (#9)
+subprocess.run(  # Show full path
+    [
+        "reg",
+        "add",
+        r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\\Explorer\CabinetState",
+        "/v",
+        "FullPath",
+        "/t",
+        "REG_DWORD",
+        "/d",
+        "1",
+        "/f",
+    ],
+    check=True,
+    stdout=subprocess.DEVNULL,
 )
-# print(output)
-ac_output = output[output.index("STANDBYIDLE") :][202:244]
-# print(ac_output)
+# Show Hidden Files (FAIL)
+# reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "HideFileExt" /t REG_DWORD /d 0 /f
 
-if ac_output == "Current AC Power Setting Index: 0x00000000":
-    print(">>> Sleep after on AC is set to Never\n\n")
-else:
-    print('>>> Sleep after on AC is NOT set to "Never"!!\n\n')
+# Show empty drives (FAIL)
+# reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "NoDrives" /t REG_DWORD /d 0 /f
+
+subprocess.run(  # Show folders merge conflicts
+    [
+        "reg",
+        "add",
+        r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced",
+        "/v",
+        "HideMergeConflicts",
+        "/t",
+        "REG_DWORD",
+        "/d",
+        "0",
+        "/f",
+    ],
+    check=True,
+    stdout=subprocess.DEVNULL,
+)
+# Show protected OS files (FAIL)
+# reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "Hidden" /t REG_DWORD /d 0 /f
+print(
+    "#9 - Display full path and show hidden folder/files/empty drives/extensions [Complete]"
+)
+
+
+# Set sleep & display off to Never in power option (#10)
+subprocess.run(
+    [
+        "powercfg",
+        "/change",
+        "standby-timeout-ac",
+        "0",
+    ],
+    check=True,
+)
+subprocess.run(
+    [
+        "powercfg",
+        "/change",
+        "standby-timeout-dc",
+        "0",
+    ],
+    check=True,
+)
+subprocess.run(
+    [
+        "powercfg",
+        "/change",
+        "monitor-timeout-ac",
+        "0",
+    ],
+    check=True,
+)
+subprocess.run(
+    [
+        "powercfg",
+        "/change",
+        "monitor-timeout-dc",
+        "0",
+    ],
+    check=True,
+)
+print("#10 - Set sleep & display off to Never in power option [Complete]")
+
+
+# Set time zone to Central US and disable auto set time (# 11)
+subprocess.run(
+    ["tzutil", "/s", '"Central Standard Time"'],
+    check=True,
+)
+subprocess.run(
+    [
+        "powershell",
+        "-Command",
+        'Set-ItemProperty -Path "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\W32Time\\Parameters" -Name "Type" -Value "NoSync"',
+    ],
+    check=True,
+)
+print("#11 - Set time zone to Central US and disable set time automatically [Complete]")
+
+
+# Auto hide the taskbar (#12)
+subprocess.run(
+    [
+        "powershell",
+        "-Command",
+        "&{$p='HKCU:SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StuckRects3';$v=(Get-ItemProperty -Path $p).Settings;$v[8]=3;&Set-ItemProperty -Path $p -Name Settings -Value $v;&Stop-Process -f -ProcessName explorer}",
+    ],
+    check=True,
+)
 
 
 # Unpin Edge and pin Paint/Snipping Tool to taskbar (#13)
@@ -223,59 +314,6 @@ subprocess.run(  # Ping Snipping Tool
 #     check=True,
 # )
 print("#13 - Unpin Edge and pin Paint/Snipping Tool to taskbar [Complete]")
-
-
-# Set brightness level to 100% and disable adaptive brightness (# 18)
-subprocess.run(
-    [
-        "powershell",
-        "-command",
-        "(Get-WmiObject -Namespace root/WMI -Class WmiMonitorBrightnessMethods).WmiSetBrightness(1,100)",
-    ],
-    check=True,
-)
-subprocess.run(
-    [
-        "powercfg",
-        "-setacvalueindex",
-        "SCHEME_CURRENT",
-        "7516b95f-f776-4464-8c53-06167f40cc99",
-        "FBD9AA66-9553-4097-BA44-ED6E9D65EAB8",
-        "0",
-    ],
-    check=True,
-)
-subprocess.run(
-    [
-        "powercfg",
-        "-setdcvalueindex",
-        "SCHEME_CURRENT",
-        "7516b95f-f776-4464-8c53-06167f40cc99",
-        "FBD9AA66-9553-4097-BA44-ED6E9D65EAB8",
-        "0",
-    ],
-    check=True,
-)
-subprocess.run(["powercfg", "-SetActive", "SCHEME_CURRENT"], check=True)
-print("#18 - Set Brightness level to 100% and disable adaptive brightness [Complete]")
-
-# Uninstall MS Office (#18)
-# TODO: Remove MS Office 365/One Note/Teams from Installed apps
-subprocess.run(
-    [
-        "powershell",
-        "-Command",
-        "Get-AppxPackage *OfficeHub* | Remove-AppxPackage; Get-AppxPackage *OneNote* | Remove-AppxPackage; Get-AppxPackage *Office* | Remove-AppxPackage",
-    ],
-    shell=True,
-    check=True,
-)
-print("#19 - Uninsalled MS Office [Complete]")
-
-
-# TODO: Uninstall HP apps (#19)
-
-# TODO: Install .NET Framwork 3.5
 
 
 # TODO: Disable UAC prompt (# 14)  需要重開機
@@ -313,12 +351,57 @@ subprocess.run(
 print("#17 - Set resolution to 1920x1080 @ 100% [Complete]")
 
 
-# # SET TIME ZONE
-# tzutil /s "Central Standard Time"
-# w32tm /resync > NUL
-# echo (3) Time zone is set to Central (US)
-# echo.
+# Set brightness level to 100% and disable adaptive brightness (# 18)
+subprocess.run(
+    [
+        "powershell",
+        "-command",
+        "(Get-WmiObject -Namespace root/WMI -Class WmiMonitorBrightnessMethods).WmiSetBrightness(1,100)",
+    ],
+    check=True,
+)
+subprocess.run(
+    [
+        "powercfg",
+        "-setacvalueindex",
+        "SCHEME_CURRENT",
+        "7516b95f-f776-4464-8c53-06167f40cc99",
+        "FBD9AA66-9553-4097-BA44-ED6E9D65EAB8",
+        "0",
+    ],
+    check=True,
+)
+subprocess.run(
+    [
+        "powercfg",
+        "-setdcvalueindex",
+        "SCHEME_CURRENT",
+        "7516b95f-f776-4464-8c53-06167f40cc99",
+        "FBD9AA66-9553-4097-BA44-ED6E9D65EAB8",
+        "0",
+    ],
+    check=True,
+)
+subprocess.run(["powercfg", "-SetActive", "SCHEME_CURRENT"], check=True)
+print("#18 - Set Brightness level to 100% and disable adaptive brightness [Complete]")
 
+# Uninstall MS Office (#19)
+# TODO: Remove MS Office 365/One Note/Teams from Installed apps
+subprocess.run(
+    [
+        "powershell",
+        "-Command",
+        "Get-AppxPackage *OfficeHub* | Remove-AppxPackage; Get-AppxPackage *OneNote* | Remove-AppxPackage; Get-AppxPackage *Office* | Remove-AppxPackage",
+    ],
+    shell=True,
+    check=True,
+)
+print("#19 - Uninsalled MS Office [Complete]")
+
+
+# TODO: Uninstall HP apps (#20)
+
+# TODO: Install .NET Framwork 3.5 (#21)
 
 # TODO: Pause Windows Update and disable Allow downloads from other PCs (#22)
 
