@@ -1,6 +1,4 @@
 Microsoft Security Essentials
-Office 16 Click-to-Run Extensibility Component
-Office 16 Click-to-Run Licensing Component
 Microsoft 365 - en-us
 Microsoft OneNote - en-us
 Microsoft Teams

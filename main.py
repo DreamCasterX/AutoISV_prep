@@ -2,6 +2,27 @@ import subprocess
 import sys
 import shutil
 import os
+import ctypes
+
+
+# Force users to run the tool as administrator
+def is_admin():
+    try:
+        # Check if the current process has administrator privileges
+        return ctypes.windll.shell32.IsUserAnAdmin() != 0
+    except Exception:
+        return False
+
+
+def run_as_admin():
+    if not is_admin():
+        # Re-run the script with elevated privileges
+        ctypes.windll.shell32.ShellExecuteW(
+            None, "runas", sys.executable, " ".join(sys.argv), None, 1
+        )
+
+
+run_as_admin()
 
 
 def ask(func):
