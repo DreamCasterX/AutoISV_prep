@@ -19,14 +19,17 @@ def ask(func):
     return inner
 
 
-print(r"""
- __________________________________
- Starting ISV System-Prep Auto Tool 
+print(
+    r"""
+ ___________________________________
+ ISV Benchmark System-Prep Auto Tool 
                 v1.0 
- ==================================
-""")
+ ===================================
+"""
+)
 
-# Check if any devices reports error status (# 1)
+
+# Check if any devices reports error status (#1)
 @ask
 def case_01():
     get_error_devices = subprocess.run(
@@ -38,7 +41,7 @@ def case_01():
         capture_output=True,
         text=True,
     )
-    error_devices =get_error_devices.stdout.strip().splitlines()
+    error_devices = get_error_devices.stdout.strip().splitlines()
     if error_devices:
         print(
             "#1 - YB found in device manager!! Please look into the problematic device(s):\n"
@@ -83,6 +86,7 @@ def case_02():
             print(
                 "#2 - Intel DPTF is supported but NOT enabled!! Please enter BIOS to enable it"
             )
+            os.system("pause")
             sys.exit()
         if "OK" in DPTF_status:
             print("#2 - Intel DPTF is already enabled [Complete]")
@@ -119,24 +123,24 @@ def case_03():
     power_plan_current_string = power_plan_current.stdout.strip()
     if "{10}" in chassis_string:  # Notebook
         while True:
-            charging_status = subprocess.run(   # Check AC or DC mode
+            charging_status = subprocess.run(  # Check AC or DC mode
                 ["wmic", "path", "Win32_Battery", "Get", "BatteryStatus"],
                 capture_output=True,
                 text=True,
             )
             charging_status_string = charging_status.stdout.strip()
             while "1" in charging_status_string:  # Not charging
-                print("#3 - <NB> To set AC power plan, please plug in AC power!!") 
-                confirm = input("Are you ready? (y/n) ") 
+                print("#3 - <NB> To set AC power plan, please plug in AC power!!")
+                confirm = input("Are you ready? (y/n) ")
                 if confirm.lower() == "y":
                     break
                 elif confirm.lower() == "n":
                     sys.exit()
                 else:
                     continue
-            if "2" in charging_status_string: # Charging
+            if "2" in charging_status_string:  # Charging
                 break
-        if "HP Optimized" in power_plan_all_string:            
+        if "HP Optimized" in power_plan_all_string:
             for line in power_plan_all_string.splitlines():
                 if "HP Optimized" in line:
                     hp_optimized_guid = line[19:55]
@@ -153,18 +157,16 @@ def case_03():
                 )
                 print("#3 - <NB> Set power plan as HP Optimized [Complete]")
         if "HP Optimized" not in power_plan_all_string:
-                print(
-                    "#3 - <NB> HP Optimized is not available. Use default power plan [Complete]"
-                )
+            print(
+                "#3 - <NB> HP Optimized is not available. Use default power plan [Complete]"
+            )
     else:  # Desktop
         if "High performance" in power_plan_all_string:
             for line in power_plan_all_string.splitlines():
                 if "High performance" in line:
                     high_performance_guid = line[19:55]
             if "High performance" in power_plan_current_string:
-                print(
-                    "#3 - <DT> Set power plan as High performance [Complete]"
-                )
+                print("#3 - <DT> Set power plan as High performance [Complete]")
             if "High performance" not in power_plan_current_string:
                 subprocess.run(
                     [
@@ -174,25 +176,24 @@ def case_03():
                     ],
                     check=True,
                 )
-                print(
-                    "#3 - <DT> Set power plan as High performance [Complete]"
-                )
+                print("#3 - <DT> Set power plan as High performance [Complete]")
         if "High performance" not in power_plan_all_string:
             print("#3 - <DT> Power plan for High performance is not availalbe!!")
+            os.sytem("pause")
             sys.exit()
 
 
 # Turn off Wi-Fi/BT and turn on airplane mode (#4)  *Reboot required
 # Airplane mode has a bug (only icon changes)
 # TODO: turn off WWAN
-# netsh mbn set acstate interface="Cellular" state=autooff dataenablement
+# netsh mbn set acstate interface="Cellular" state=autooff dataenablement (can't work)
 @ask
 def case_04():
     app_path = "./src/app/BT.ps1"
     check_wifi = subprocess.run(  # Turn off Wi-Fi
         [
             "powershell",
-            'Get-NetAdapterAdvancedProperty',
+            "Get-NetAdapterAdvancedProperty",
         ],
         capture_output=True,
         text=True,
@@ -206,30 +207,36 @@ def case_04():
             ],
             check=True,
         )
-        get_default_policy = subprocess.run(["powershell", 'Get-ExecutionPolicy'], capture_output=True, text=True)
+        get_default_policy = subprocess.run(
+            ["powershell", "Get-ExecutionPolicy"], capture_output=True, text=True
+        )
         default_policy = get_default_policy.stdout.strip()
         subprocess.run(  # Change execution policy to allow running powershell script
             [
                 "powershell",
-                'Set-ExecutionPolicy RemoteSigned',
+                "Set-ExecutionPolicy RemoteSigned",
             ],
             check=True,
         )
-        subprocess.run(['powershell.exe', '-File', app_path, '-BluetoothStatus', 'Off'], check=True)  # Turn off BT
-        subprocess.run(   # Reset to the default execution policy
+        subprocess.run(
+            ["powershell.exe", "-File", app_path, "-BluetoothStatus", "Off"], check=True
+        )  # Turn off BT
+        subprocess.run(  # Reset to the default execution policy
             [
                 "powershell",
-                f'Set-ExecutionPolicy {default_policy}',
+                f"Set-ExecutionPolicy {default_policy}",
             ],
             check=True,
         )
-        os.system(r"reg add HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\RadioManagement\SystemRadioState /ve /t REG_DWORD /d 1 /f > nul 2>&1") # Turn on airplane mode (Reboot required)
+        os.system(
+            r"reg add HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\RadioManagement\SystemRadioState /ve /t REG_DWORD /d 1 /f > nul 2>&1"
+        )  # Turn on airplane mode (Reboot required)
         print("#4 - Turn off Wi-Fi and turn on airplane mode [Complete]")
     else:
         print("#4 - WiFi is not supported on this platform. Skip [Complete]")
-       
 
-# Turn off User Account Control (UAC) (#5) 
+
+# Turn off User Account Control (UAC) (#5)
 @ask
 def case_05():
     subprocess.run(
@@ -260,10 +267,11 @@ def case_06():
         print("#6 - Add RT Click Options regestry [Complete]")
     except:
         print("#6 - Failed to add RT Click Options regestry!!")
+        os.sytem("pause")
         sys.exit()
 
 
-# Check if Secure Boot is disabled and enable test signing (# 7)
+# Check if Secure Boot is disabled and enable test signing (#7)
 @ask
 def case_07():
     get_sb_state = subprocess.run(
@@ -272,6 +280,7 @@ def case_07():
     sb_state = get_sb_state.stdout.strip()
     if sb_state.lower() == "true":
         print("Secure boot is enabled!! Enter BIOS to disable Secure boot first")
+        os.sytem("pause")
         sys.exit()
     else:
         try:
@@ -283,6 +292,7 @@ def case_07():
             print("#7 - Enable test mode [Complete]")
         except:
             print("#7 - Failed to enable test mode!!")
+            os.sytem("pause")
             sys.exit()
 
 
@@ -303,6 +313,7 @@ def case_08():
         print("#8 - Copy PowerConfig folder and import power scheme [Complete]")
     except:
         print("#8 - Failed to copy PowerConfig folder and import power scheme!!")
+        os.sytem("pause")
         sys.exit()
 
 
@@ -405,7 +416,9 @@ def case_09():
         check=True,
         stdout=subprocess.DEVNULL,
     )
-    os.system("taskkill /F /IM explorer.exe > nul 2>&1")  # Restart Windows Explorer to take effect changes immediately
+    os.system(
+        "taskkill /F /IM explorer.exe > nul 2>&1"
+    )  # Restart Windows Explorer to take effect changes immediately
     os.system("start explorer.exe > nul 2>&1")
     print(
         "#9 - Display full path/hidden files/empty drives/extensions/merge conflicts/protected OS files [Complete]"
@@ -455,7 +468,7 @@ def case_10():
     print("#10 - Set sleep & display off to Never in power option [Complete]")
 
 
-# Set time zone to Central US and disable auto set time (# 11)
+# Set time zone to Central US and disable auto set time (#11)
 # Need to manually set correct time by users
 @ask
 def case_11():
@@ -522,7 +535,7 @@ def case_13():
     print("#13 - Unpin Edge and pin Paint/Snipping Tool to taskbar [Complete]")
 
 
-# Set UAC Admin Approval Mode to disabled (Same as case_05)
+# Set UAC Admin Approval Mode to disabled - Same as case_05 (#14)
 @ask
 def case_14():
     subprocess.run(
@@ -544,7 +557,7 @@ def case_14():
     print("#14 - Set UAC Admin Approval Mode to disabled [Complete]")
 
 
-# Turn off Windows Defender Firewall (# 15)
+# Turn off Windows Defender Firewall (#15)
 @ask
 def case_15():
     subprocess.run(
@@ -557,7 +570,6 @@ def case_15():
 
 # TODO: Turn off all messages in Security and Maintenance settings (#16)
 # def case_16:
-
 
 
 # Set resolution to 1920x1080 and DPI to 100% (#17)
@@ -578,8 +590,7 @@ def case_17():
     print("#17 - Set resolution to 1920x1080 @ 100% [Complete]")
 
 
-# Set brightness level to 100% and disable adaptive brightness (# 18)
-# TODO: Check if the code can work on platform without ALS. If no, set stderr to NUL
+# Set brightness level to 100% and disable adaptive brightness (#18)
 @ask
 def case_18():
     subprocess.run(
@@ -619,8 +630,6 @@ def case_18():
 
 
 # Uninstall MS Office and related apps (#19)
-# TODO: UWP app
-# Get-AppxPackage –AllUsers
 @ask
 def case_19():
     subprocess.run(
@@ -632,8 +641,26 @@ def case_19():
         shell=True,
         check=True,
     )
-    MS_blacklist_path = "./src/blacklist_MS.txt"  # TODO: Manual update name in the file
-    MS_blacklist = []  
+    subprocess.run(  # Uninstall MS Teams UWP app
+        [
+            "powershell",
+            "-Command",
+            "Get-AppxPackage *MicrosoftTeams* | Remove-AppxPackage",
+        ],
+        shell=True,
+        check=True,
+    )
+    subprocess.run(  # Uninstall Outlook UWP app
+        [
+            "powershell",
+            "-Command",
+            "Get-AppxPackage *Outlook* | Remove-AppxPackage",
+        ],
+        shell=True,
+        check=True,
+    )
+    MS_blacklist_path = "./src/blacklist_MS.txt"  # Manual update name in the file
+    MS_blacklist = []
     with open(MS_blacklist_path, "r") as txt:
         for item in txt:
             MS_blacklist.append(item.strip())
@@ -642,18 +669,11 @@ def case_19():
         print(f"{index}. {app}")
     for MS_app in MS_blacklist:
         subprocess.run(
-            [
-            "wmic",
-            "product",
-            "where",
-            f"name='{MS_app}'",
-            "call",
-            "uninstall"
-            ],
+            ["wmic", "product", "where", f"name='{MS_app}'", "call", "uninstall"],
             shell=True,
             check=True,
             stderr=subprocess.DEVNULL,
-            stdout=subprocess.DEVNULL            
+            stdout=subprocess.DEVNULL,
         )
     print("#19 - Uninsalled MS Office and related apps [Complete]")
 
@@ -661,9 +681,27 @@ def case_19():
 # Uninstall HP apps (#20)
 # wmic product get name | findstr "HP"
 @ask
-def case_0020():
-    HP_blacklist_path = "./src/blacklist_HP.txt"  # TODO: Manual update name in the file
-    HP_blacklist = []  
+def case_20():
+    subprocess.run(  # Uninstall HP Support Assistant UWP app
+        [
+            "powershell",
+            "-Command",
+            "Get-AppxPackage *HPSupportAssistant* | Remove-AppxPackage",
+        ],
+        shell=True,
+        check=True,
+    )
+    subprocess.run(  # Uninstall myHP UWP app
+        [
+            "powershell",
+            "-Command",
+            "Get-AppxPackage *myHP* | Remove-AppxPackage",
+        ],
+        shell=True,
+        check=True,
+    )
+    HP_blacklist_path = "./src/blacklist_HP.txt"  # Manual update name in the file
+    HP_blacklist = []
     with open(HP_blacklist_path, "r") as txt:
         for item in txt:
             HP_blacklist.append(item.strip())
@@ -672,58 +710,199 @@ def case_0020():
         print(f"{index}. {app}")
     for HP_app in HP_blacklist:
         subprocess.run(
-            [
-            "wmic",
-            "product",
-            "where",
-            f"name='{HP_app}'",
-            "call",
-            "uninstall"
-            ],
+            ["wmic", "product", "where", f"name='{HP_app}'", "call", "uninstall"],
             shell=True,
             check=True,
             stderr=subprocess.DEVNULL,
-            stdout=subprocess.DEVNULL            
+            stdout=subprocess.DEVNULL,
         )
     print("#20 - Uninsalled HP apps [Complete]")
 
 
-# Install .NET Framwork 3.5 (#21)
-# TODO: Make sure corp net can ping google.com
+# Install .NET Framework 3.5 (#21)
+# TODO: Corp net can't ping google.com
+# Must be run as administrator
 @ask
-def case_021():     
-    while True:
-        check_internet = subprocess.run(
-            ["ping", "google.com", "-w", "4"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
-            text=True,
-        )
-        check_internet_string = check_internet.stdout
-        while "Ping request could not find host" in check_internet_string:
-            print("#21 - To download .NET framwoork 3.5, please connect to Internet!!")
-            confirm = input("Are you ready? (y/n) ") 
-            if confirm.lower() == "y":
-                break
-            elif confirm.lower() == "n":
-                sys.exit()
-            else:
-                continue
-        else:
-            break
-    subprocess.run(
-        [
-            "powershell",
-            "-command",
-            "Enable-WindowsOptionalFeature -FeatureName NetFx3 -Online",
-        ],
+def case_21():
+    check_dotnet35_state = subprocess.run(  # Check AC or DC mode
+        ["Dism", "/online", "/Get-FeatureInfo", "/FeatureName:NetFx3"],
+        capture_output=True,
         text=True,
+    )
+    dotnet35_state = check_dotnet35_state.stdout.strip()
+    if "State : Enabled" in dotnet35_state:
+        print("#21 - .NET Framework 3.5 is already installed [Complete]")
+    else:
+        while True:
+            check_internet = subprocess.run(
+                ["ping", "google.com", "-w", "4"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                text=True,
+            )
+            check_internet_string = check_internet.stdout
+            while "Ping request could not find host" in check_internet_string:
+                print(
+                    "#21 - To download .NET framework 3.5, please connect to Internet!!"
+                )
+                confirm = input("Are you ready? (y/n) ")
+                if confirm.lower() == "y":
+                    break
+                elif confirm.lower() == "n":
+                    sys.exit()
+                else:
+                    continue
+            else:
+                break
+        subprocess.run(
+            [
+                "powershell",
+                "-command",
+                "Enable-WindowsOptionalFeature -FeatureName NetFx3 -Online",
+            ],
+            text=True,
+            stdout=subprocess.DEVNULL,
+        )
+        print("#21 - Install .NET Framework 3.5 [Complete]")
+
+
+# Pause Windows Update and turn off Delivery Optimization (#22)
+@ask
+def case_22():
+    subprocess.run(  # Change the maximum days for WU pause
+        [
+            "reg",
+            "add",
+            r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings",
+            "/v",
+            "FlightSettingsMaxPauseDays",
+            "/t",
+            "REG_DWORD",
+            "/d",
+            "0x00000e42",  # 10 year
+            "/f",
+        ],
+        check=True,
         stdout=subprocess.DEVNULL,
     )
-    print("#21 - Install .NET Framwork 3.5 [Complete]")
+    subprocess.run(
+        [
+            "reg",
+            "add",
+            r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings",
+            "/v",
+            "PauseFeatureUpdatesStartTime",
+            "/t",
+            "REG_SZ",
+            "/d",
+            "2024-03-11T07:00:00Z",
+            "/f",
+        ],
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
+    subprocess.run(
+        [
+            "reg",
+            "add",
+            r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings",
+            "/v",
+            "PauseFeatureUpdatesEndTime",
+            "/t",
+            "REG_SZ",
+            "/d",
+            "2034-02-11T18:00:37Z",
+            "/f",
+        ],
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
+    subprocess.run(
+        [
+            "reg",
+            "add",
+            r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings",
+            "/v",
+            "PauseQualityUpdatesStartTime",
+            "/t",
+            "REG_SZ",
+            "/d",
+            "2024-03-11T07:00:00Z",
+            "/f",
+        ],
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
+    subprocess.run(
+        [
+            "reg",
+            "add",
+            r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings",
+            "/v",
+            "PauseQualityUpdatesEndTime",
+            "/t",
+            "REG_SZ",
+            "/d",
+            "2034-02-11T18:00:37Z",
+            "/f",
+        ],
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
+    subprocess.run(
+        [
+            "reg",
+            "add",
+            r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings",
+            "/v",
+            "PauseUpdatesStartTime",
+            "/t",
+            "REG_SZ",
+            "/d",
+            "2024-03-11T07:00:00Z",
+            "/f",
+        ],
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
+    subprocess.run(
+        [
+            "reg",
+            "add",
+            r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings",
+            "/v",
+            "PauseUpdatesEndTime",
+            "/t",
+            "REG_SZ",
+            "/d",
+            "2034-02-11T18:00:37Z",
+            "/f",
+        ],
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
+    subprocess.run(  # Disable Allow downloads from other PCs
+        [
+            "reg",
+            "add",
+            r"HKEY_USERS\S-1-5-20\Software\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Settings",
+            "/v",
+            "DownloadMode",
+            "/t",
+            "REG_DWORD",
+            "/d",
+            "0",
+            "/f",
+        ],
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
+    print("#22 - Pause WU and turn off Delivery Optimization [Complete]")
 
 
-# TODO: Pause Windows Update and disable Allow downloads from other PCs (#22)
+# TODO: #23
+
+# TODO: #24
 
 
 # Set regristry for DriverSearching to 0  (#25)
@@ -748,7 +927,72 @@ def case_25():
     print("#25 - Set Registry key for DriverSearching to 0 [Complete]")
 
 
-# TODO: Turn off Smart app control/Reputation-based protection/Isolated browsing (#26)
+# Turn off SmartScreen for apps/files/MS Edge/MS Store apps under Reputation-based protection (#26)
+@ask
+def case_26():
+    subprocess.run(  # Turn off "Check apps and files"
+        [
+            "reg",
+            "add",
+            r"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System",
+            "/v",
+            "EnableSmartScreen",
+            "/t",
+            "REG_DWORD",
+            "/d",
+            "0",
+            "/f",
+        ],
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
+    subprocess.run(  # Turn off "SmartScreen for Microsoft Edge"
+        [
+            "reg",
+            "add",
+            r"HKEY_CURRENT_USER\Software\Microsoft\Edge\SmartScreenEnabled",
+            "/t",
+            "REG_DWORD",
+            "/d",
+            "0",
+            "/f",
+        ],
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
+    subprocess.run(  # Turn off "SmartScreen for Microsoft Store apps"
+        [
+            "reg",
+            "add",
+            r"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\AppHost",
+            "/v",
+            "PreventOverride",
+            "/t",
+            "REG_DWORD",
+            "/d",
+            "0",
+            "/f",
+        ],
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
+    subprocess.run(
+        [
+            "reg",
+            "add",
+            r"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\AppHost",
+            "/v",
+            "EnableWebContentEvaluation",
+            "/t",
+            "REG_DWORD",
+            "/d",
+            "0",
+            "/f",
+        ],
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
+    print("#27 - Turn off SmartScreen for apps/files/MS Edge/MS Store apps [Complete]")
 
 
 # Disable and stop Windows Update/Firewall services (#27)
@@ -757,7 +1001,10 @@ def case_27():
     try:
         subprocess.run(  # Disable WU service
             [
-                "sc", "config", "wuauserv", "start=disabled",
+                "sc",
+                "config",
+                "wuauserv",
+                "start=disabled",
             ],
             check=True,
             shell=True,
@@ -765,7 +1012,9 @@ def case_27():
         )
         subprocess.run(  # Stop WU service
             [
-                "sc", "stop", "wuauserv",
+                "sc",
+                "stop",
+                "wuauserv",
             ],
             check=True,
             shell=True,
@@ -773,7 +1022,10 @@ def case_27():
         )
         subprocess.run(  # Disable Firewall service
             [
-                "sc", "config", "mpssvc", "start=disabled",
+                "sc",
+                "config",
+                "mpssvc",
+                "start=disabled",
             ],
             check=True,
             shell=True,
@@ -781,7 +1033,9 @@ def case_27():
         )
         subprocess.run(  # Stop Firewall service
             [
-                "sc", "stop", "mpssvc",
+                "sc",
+                "stop",
+                "mpssvc",
             ],
             check=True,
             shell=True,
@@ -816,17 +1070,29 @@ case_10()
 case_11()
 case_12()
 case_13()
-# case_14()
+case_14()
 case_15()
-case_16()
-# case_17()
+# case_16()
+case_17()
 case_18()
 case_19()
-# case_20()
-# case_22()
+case_20()
+case_22()
 # case_23()
 # case_24()
 case_25()
-# case_26()
+case_26()
 case_27()
 case_28()
+
+while True:
+    answer = input(
+        "\n*All done! Restart the system to take effect changes now? (y/n)\n"
+    )
+    if answer.lower() == "y":
+        os.system("shutdown /r /t 1")
+        break
+    if answer.lower() == "n":
+        sys.exit()
+    else:
+        continue
