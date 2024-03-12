@@ -42,10 +42,10 @@ def ask(func):
 
 print(
     r"""
- ___________________________________
- ISV Benchmark System-Prep Auto Tool 
-                v1.0 
- ===================================
+ _____________________________________
+  ISV Benchmark System-Prep Auto Tool 
+                  v1.0 
+ =====================================
 """
 )
 
@@ -447,7 +447,6 @@ def case_09():
 
 
 # Set sleep & display off to Never in power option (#10)
-# TODO: confirm if DC mode can be set on DT platform without errors
 @ask
 def case_10():
     subprocess.run(
@@ -590,7 +589,8 @@ def case_15():
 
 
 # TODO: Turn off all messages in Security and Maintenance settings (#16)
-# def case_16:
+def case_16():
+    print("#16 - Turn off Security and Maintenance messages [Complete]")
 
 
 # Set resolution to 1920x1080 and DPI to 100% (#17)
@@ -923,7 +923,87 @@ def case_22():
 
 # TODO: #23
 
-# TODO: #24
+
+# Customize Pagefile size & disable device driver auto installation/System Protection/Remote Assistance connections (#24)
+# TODO: Adust for Best Performance
+@ask
+def case_24():
+    PC_name = os.getenv("computername")
+    windows_drive = os.getenv("SystemDrive")
+    pagefile = windows_drive + r"\\pagefile.sys"
+    subprocess.run(  # Turn off device driver auto installation
+        [
+            "reg",
+            "add",
+            r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Metadata",
+            "/v",
+            "PreventDeviceMetadataFromNetwork",
+            "/t",
+            "REG_DWORD",
+            "/d",
+            "1",
+            "/f",
+        ],
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
+    subprocess.run(  # Turn off Automatically manage paging file size
+        [
+            "wmic",
+            "computersystem",
+            "where",
+            f"name='{PC_name}'",
+            "set",
+            "AutomaticManagedPagefile=False",
+        ],
+        shell=True,
+        check=True,
+        stderr=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+    )
+    get_memory = subprocess.run(  # Get total p
+        ["wmic", "ComputerSystem", "get", "TotalPhysicalMemory"],
+        capture_output=True,
+        text=True,
+    )
+    memory = int(get_memory.stdout.strip().split("\n")[-1])
+    min = round(memory / 1024**3)
+    max = min * 2
+    # <Example> wmic pagefileset where name="C:\\pagefile.sys" set InitialSize=80000,MaximumSize=16000
+    try:
+        os.system(  # Customize Initial size and Maximum size(Initial size*2)
+            f'wmic pagefileset where name="{pagefile}" set InitialSize={min*1000},MaximumSize={max*1000} > nul 2>&1'
+        )
+    except:
+        print("Failed to create pagefile!!")
+        os.system("pause")
+        sys.exit()
+    subprocess.run(  # Turn off System Protection
+        [
+            "powershell",
+            f'Disable-ComputerRestore -Drive "{windows_drive}"',  # fmt: skip
+        ],
+        check=True,
+    )
+    subprocess.run(  # Disable Remote Assistance connections
+        [
+            "reg",
+            "add",
+            r"HKLM\SYSTEM\CurrentControlSet\Control\Remote Assistance",
+            "/v",
+            "fAllowToGetHelp",
+            "/t",
+            "REG_DWORD",
+            "/d",
+            "0",
+            "/f",
+        ],
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
+    print(
+        "#24 - Customize Pagefile size & disable device driver auto installation/System Protection/Remote Assistance connections [Complete]"
+    )
 
 
 # Set regristry for DriverSearching to 0  (#25)
@@ -1106,10 +1186,9 @@ case_26()
 case_27()
 case_28()
 
+print("===============================================================")
 while True:
-    answer = input(
-        "\n*All done! Restart the system to take effect changes now? (y/n)\n"
-    )
+    answer = input("\nAll done! Restart the system to take effect changes now? (y/n)\n")
     if answer.lower() == "y":
         os.system("shutdown /r /t 1")
         break
