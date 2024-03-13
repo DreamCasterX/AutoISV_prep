@@ -211,7 +211,7 @@ def case_03():
 @ask
 def case_04():
     app_path = "./src/app/BT.ps1"
-    check_wifi = subprocess.run(  # Turn off Wi-Fi
+    check_wifi = subprocess.run(  # Get all network interfaces
         [
             "powershell",
             "Get-NetAdapterAdvancedProperty",
@@ -219,6 +219,8 @@ def case_04():
         capture_output=True,
         text=True,
     )
+    # if "Cellular" in check_wifi.stdout.strip():  # Turn off WWAN
+
     if "Wi-Fi" in check_wifi.stdout.strip():
         subprocess.run(  # Turn off Wi-Fi
             [
@@ -279,15 +281,15 @@ def case_05():
     print("#5 - Turn off User Account Control (UAC) [Complete]")
 
 
-# Add RT Click Options regestry (#6)
+# Add RT Click Options registry (#6)
 @ask
 def case_06():
     reg_file_path = "./src/Rt Click Options.reg"
     try:
         os.system(f'reg import \"{reg_file_path}\" > nul 2>&1')  # fmt: skip
-        print("#6 - Add RT Click Options regestry [Complete]")
-    except:
-        print("#6 - Failed to add RT Click Options regestry!!")
+        print("#6 - Add RT Click Options registry [Complete]")
+    except OSError as error:
+        print(f"#6 - Failed to add RT Click Options registry!!\nError: {error}")
         os.sytem("pause")
         sys.exit()
 
@@ -311,8 +313,8 @@ def case_07():
                 stdout=subprocess.DEVNULL,
             )
             print("#7 - Enable test mode [Complete]")
-        except:
-            print("#7 - Failed to enable test mode!!")
+        except subprocess.CalledProcessError as error:
+            print(f"#7 - Failed to enable test mode!!\nError:{error}")
             os.sytem("pause")
             sys.exit()
 
@@ -332,8 +334,10 @@ def case_08():
             stdout=subprocess.DEVNULL,  # Uncomment to see power scheme GUID
         )
         print("#8 - Copy PowerConfig folder and import power scheme [Complete]")
-    except:
-        print("#8 - Failed to copy PowerConfig folder and import power scheme!!")
+    except subprocess.CalledProcessError as error:
+        print(
+            f"#8 - Failed to copy PowerConfig folder and import power scheme!!\nError: {error}"
+        )
         os.sytem("pause")
         sys.exit()
 
@@ -745,7 +749,7 @@ def case_20():
 # Must be run as administrator
 @ask
 def case_21():
-    check_dotnet35_state = subprocess.run(  # Check AC or DC mode
+    check_dotnet35_state = subprocess.run(  # Check if .NET Framework 3.5 is installed
         ["Dism", "/online", "/Get-FeatureInfo", "/FeatureName:NetFx3"],
         capture_output=True,
         text=True,
@@ -922,10 +926,11 @@ def case_22():
 
 
 # TODO: #23
+# def case_23():
+#     os.system("gpedit.msc > nul 2>&1")
 
 
-# Customize Pagefile size & disable device driver auto installation/System Protection/Remote Assistance connections (#24)
-# TODO: Adust for Best Performance
+# Set Best Performance & customize Pagefile size & disable device driver auto installation/System Protection/Remote Assistance connections (#24)
 @ask
 def case_24():
     PC_name = os.getenv("computername")
@@ -947,6 +952,25 @@ def case_24():
         check=True,
         stdout=subprocess.DEVNULL,
     )
+    get_visualsetting = subprocess.run(  # Get the value of VisualFXSetting registry (best performance = 2)
+        [
+            "powershell",
+            "-command",
+            r'Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting"',
+        ],
+        capture_output=True,
+        text=True,
+    )
+    visualsetting = get_visualsetting.stdout.strip().splitlines()[0]
+    if "2" not in visualsetting:
+        subprocess.run(  # Adust for Best Performance
+            [
+                "powershell",
+                "-command",
+                r'Start-Process -FilePath "$env:SystemRoot\system32\SystemPropertiesPerformance.exe"; Start-Sleep -Seconds 1.5; Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait("{DOWN}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{DOWN}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}")',
+            ],
+            check=True,
+        )
     subprocess.run(  # Turn off Automatically manage paging file size
         [
             "wmic",
@@ -1002,7 +1026,7 @@ def case_24():
         stdout=subprocess.DEVNULL,
     )
     print(
-        "#24 - Customize Pagefile size & disable device driver auto installation/System Protection/Remote Assistance connections [Complete]"
+        "#24 - Set Best Performance & customize Pagefile size & disable device driver auto installation/System Protection/Remote Assistance connections [Complete]"
     )
 
 
@@ -1093,7 +1117,7 @@ def case_26():
         check=True,
         stdout=subprocess.DEVNULL,
     )
-    print("#27 - Turn off SmartScreen for apps/files/MS Edge/MS Store apps [Complete]")
+    print("#26 - Turn off SmartScreen for apps/files/MS Edge/MS Store apps [Complete]")
 
 
 # Disable and stop Windows Update/Firewall services (#27)
@@ -1142,8 +1166,8 @@ def case_27():
             shell=True,
             stdout=subprocess.DEVNULL,
         )
-    except:
-        pass
+    except subprocess.CalledProcessError as error:
+        pass  # Ignore error if not permitted to alter Firewall service
     print("#27 - Disable and stop Windows Update/Firewall services [Complete]")
 
 
@@ -1173,14 +1197,14 @@ case_12()
 case_13()
 case_14()
 case_15()
-# case_16()
+case_16()
 case_17()
 case_18()
 case_19()
 case_20()
 case_22()
 # case_23()
-# case_24()
+case_24()
 case_25()
 case_26()
 case_27()
