@@ -3,6 +3,7 @@ import sys
 import shutil
 import os
 import ctypes
+import time
 
 
 # Force users to run the tool as administrator
@@ -144,6 +145,9 @@ def case_03():
     power_plan_current_string = power_plan_current.stdout.strip()
     if "{10}" in chassis_string:  # Notebook
         while True:
+            # [Alternative]
+            # import psutil
+            # charging_status = psutil.sensors_battery().power_plugged -> True/False
             charging_status = subprocess.run(  # Check AC or DC mode
                 ["wmic", "path", "Win32_Battery", "Get", "BatteryStatus"],
                 capture_output=True,
@@ -925,9 +929,57 @@ def case_22():
     print("#22 - Pause WU and turn off Delivery Optimization [Complete]")
 
 
-# TODO: #23
-# def case_23():
-#     os.system("gpedit.msc > nul 2>&1")
+# Set Local Group Policy for Windows Update/Microsoft Defender Antivirus/Internet Explorer (#23)
+@ask
+def case_23():
+
+    subprocess.run(  # Enable "Do not include drivers with WU" for WU
+        [
+            "powershell",
+            "-command",
+            r'Start-Process -FilePath "$env:SystemRoot\system32\gpedit.msc"; Start-Sleep -Seconds 1.5; Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait("{A}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{RIGHT}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{RIGHT}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{RIGHT}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{M}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{M}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{M}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{D}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{D}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{E}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("%{F4}")',
+        ],
+        check=True,
+    )
+    time.sleep(2)
+    subprocess.run(  # Set "Configure automatic update" for WU
+        [
+            "powershell",
+            "-command",
+            r'Start-Process -FilePath "$env:SystemRoot\system32\gpedit.msc"; Start-Sleep -Seconds 1.5; Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait("{A}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{RIGHT}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{RIGHT}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{RIGHT}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{M}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{C}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{E}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{2}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{1}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("%{F4}")',
+        ],
+        check=True,
+    )
+    time.sleep(2)
+    subprocess.run(  # Enable "Turn Off Windows Defender Antivirus"
+        [
+            "powershell",
+            "-command",
+            r'Start-Process -FilePath "$env:SystemRoot\system32\gpedit.msc"; Start-Sleep -Seconds 1.5; Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait("{A}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{RIGHT}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{RIGHT}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{M}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{M}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{M}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{M}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{M}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{M}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{T}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{T}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{E}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("%{F4}")',
+        ],
+        check=True,
+    )
+    time.sleep(2)
+    subprocess.run(  # Enable "Turn Off the Security Setting Check feature" for IE
+        [
+            "powershell",
+            "-command",
+            r'Start-Process -FilePath "$env:SystemRoot\system32\gpedit.msc"; Start-Sleep -Seconds 1.5; Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait("{A}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{RIGHT}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{RIGHT}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{I}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{T}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{T}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{T}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{T}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{T}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{T}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{T}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{T}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{T}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{T}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{E}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("%{F4}")',
+        ],
+        check=True,
+    )
+    time.sleep(2)
+    subprocess.run(  # Disable "Install new version of IE automatically" for IE
+        [
+            "powershell",
+            "-command",
+            r'Start-Process -FilePath "$env:SystemRoot\system32\gpedit.msc"; Start-Sleep -Seconds 1.5; Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait("{A}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{RIGHT}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{W}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{RIGHT}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{I}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{I}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{I}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{I}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{D}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}"); Start-Sleep -Milliseconds 100; [System.Windows.Forms.SendKeys]::SendWait("%{F4}")',
+        ],
+        check=True,
+    )
+    print(
+        "#23 - Set Local Group Policy for Windows Update/Microsoft Defender Antivirus/Internet Explorer"
+    )
 
 
 # Set Best Performance & customize Pagefile size & disable device driver auto installation/System Protection/Remote Assistance connections (#24)
@@ -985,7 +1037,10 @@ def case_24():
         stderr=subprocess.DEVNULL,
         stdout=subprocess.DEVNULL,
     )
-    get_memory = subprocess.run(  # Get total p
+    # [Alternative]
+    # import psutil
+    # RAM = psutil.virtual_memory().total -> int
+    get_memory = subprocess.run(  # Get total physical memory
         ["wmic", "ComputerSystem", "get", "TotalPhysicalMemory"],
         capture_output=True,
         text=True,
@@ -1203,7 +1258,7 @@ case_18()
 case_19()
 case_20()
 case_22()
-# case_23()
+case_23()
 case_24()
 case_25()
 case_26()
