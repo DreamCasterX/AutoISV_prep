@@ -978,7 +978,7 @@ def case_23():
         check=True,
     )
     print(
-        "#23 - Set Local Group Policy for Windows Update/Microsoft Defender Antivirus/Internet Explorer"
+        "#23 - Set Local Group Policy for Windows Update/Microsoft Defender Antivirus/Internet Explorer [Complete]"
     )
 
 
