@@ -26,17 +26,29 @@ def run_as_admin():
 run_as_admin()
 
 
-def ask(func):
+# Debug mode
+def warning_before(func):
     def inner(*args, **kwargs):
-        func(*args, **kwargs)
         while True:
-            answer = input("\nMove to the next case? (y/n)\n")
+            answer = input(
+                "\n<Attention> Do not interact with desktop from now on. Ready for the next case? (y/n) "
+            )
             if answer.lower() == "y":
                 break
             if answer.lower() == "n":
                 sys.exit()
             else:
                 continue
+        func(*args, **kwargs)
+
+    return inner
+
+
+# Delay interval
+def delay_after(func):
+    def inner(*args, **kwargs):
+        func(*args, **kwargs)
+        time.sleep(3)
 
     return inner
 
@@ -336,6 +348,7 @@ def case_08():
 
 
 # Display full path/hidden files/empty drives/extensions/merge conflicts/protected OS files (#9)
+@delay_after
 def case_09():
     subprocess.run(  # Display the full path in the title bar
         [
@@ -517,6 +530,7 @@ def case_12():
 
 
 # Unpin Edge and pin Paint/Snipping Tool to taskbar (#13)
+@delay_after
 def case_13():
     reg_file_path = "./src/app/syspin.exe"
     app_path = os.environ.get("LocalAppData")
@@ -584,6 +598,7 @@ def case_16():
 
 
 # Set resolution to 1920x1080 and DPI to 100% (#17)
+@delay_after
 def case_17():
     res_app_path = "./src/app/QRes.exe"
     dpi_app_path = "./src/app/SetDpi.exe"
@@ -906,8 +921,9 @@ def case_22():
 
 
 # Set Local Group Policy for Windows Update/Microsoft Defender Antivirus/Internet Explorer (#23)
+@warning_before
+@delay_after
 def case_23():
-
     subprocess.run(  # Enable "Do not include drivers with WU" for WU
         [
             "powershell",
