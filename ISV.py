@@ -1027,18 +1027,20 @@ def case_24():
         stderr=subprocess.DEVNULL,
         stdout=subprocess.DEVNULL,
     )
-    get_memory = subprocess.run(  # Get total p
-        ["wmic", "ComputerSystem", "get", "TotalPhysicalMemory"],
+    get_memory_size = subprocess.run(  # Get Total Installed Physical Memory size
+        [
+            "powershell",
+            f"(Get-CimInstance Win32_PhysicalMemory | Measure-Object -Property capacity -Sum).sum /1gb",
+        ],
         capture_output=True,
         text=True,
     )
-    memory = int(get_memory.stdout.strip().split("\n")[-1])
-    min = round(memory / 1024**3)
-    max = min * 2
-    # <Example> wmic pagefileset where name="C:\\pagefile.sys" set InitialSize=80000,MaximumSize=16000
+    init_memory_size = int(get_memory_size.stdout.strip())
+    max_memory_size = init_memory_size * 2
+    # <Example> wmic pagefileset where name="C:\\pagefile.sys" set InitialSize=8000,MaximumSize=16000
     try:
-        os.system(  # Customize Initial size and Maximum size(Initial size*2)
-            f'wmic pagefileset where name="{pagefile}" set InitialSize={min*1000},MaximumSize={max*1000} > nul 2>&1'
+        os.system(  # Customize Initial size and Maximum size
+            f'wmic pagefileset where name="{pagefile}" set InitialSize={init_memory_size*1000},MaximumSize={max_memory_size*1000} > nul 2>&1'
         )
     except:
         print("Failed to create pagefile!!")
