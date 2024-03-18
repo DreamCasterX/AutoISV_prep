@@ -1022,26 +1022,25 @@ def case_24():
             check=True,
             stdout=subprocess.DEVNULL,
         )
-    else:
-        get_visualsetting = subprocess.run(  # Get the value of VisualFXSetting registry (best performance = 2)
+    get_visualsetting = subprocess.run(  # Get the value of VisualFXSetting registry (best performance = 2)
+        [
+            "powershell",
+            "-command",
+            r'Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting"',
+        ],
+        capture_output=True,
+        text=True,
+    )
+    visualsetting = get_visualsetting.stdout.strip().splitlines()[0]
+    if "2" not in visualsetting:
+        subprocess.run(  # Adust for Best Performance
             [
                 "powershell",
                 "-command",
-                r'Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting"',
+                r'Start-Process -FilePath "$env:SystemRoot\system32\SystemPropertiesPerformance.exe"; Start-Sleep -Seconds 1.5; Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait("{DOWN}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{DOWN}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}")',
             ],
-            capture_output=True,
-            text=True,
+            check=True,
         )
-        visualsetting = get_visualsetting.stdout.strip().splitlines()[0]
-        if "2" not in visualsetting:
-            subprocess.run(  # Adust for Best Performance
-                [
-                    "powershell",
-                    "-command",
-                    r'Start-Process -FilePath "$env:SystemRoot\system32\SystemPropertiesPerformance.exe"; Start-Sleep -Seconds 1.5; Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait("{DOWN}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{DOWN}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}")',
-                ],
-                check=True,
-            )
     subprocess.run(  # Turn off Automatically manage paging file size
         [
             "wmic",
