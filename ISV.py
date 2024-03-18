@@ -57,7 +57,7 @@ print(
     r"""
  _____________________________________
   ISV Benchmark System-Prep Auto Tool 
-                  v1.1 
+                  v1.2 
  =====================================
 """
 )
@@ -994,25 +994,54 @@ def case_24():
         check=True,
         stdout=subprocess.DEVNULL,
     )
-    get_visualsetting = subprocess.run(  # Get the value of VisualFXSetting registry (best performance = 2)
+    check_fx_registry = subprocess.run(  # Check if VisualFXSetting registry exists
         [
-            "powershell",
-            "-command",
-            r'Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting"',
+            "reg",
+            "query",
+            r"HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects",
+            "/v",
+            "VisualFXSetting",
         ],
         capture_output=True,
         text=True,
     )
-    visualsetting = get_visualsetting.stdout.strip().splitlines()[0]
-    if "2" not in visualsetting:
-        subprocess.run(  # Adust for Best Performance
+    if check_fx_registry.returncode != 0:
+        subprocess.run(  # Add VisualFXSetting registry if not existed
+            [
+                "reg",
+                "add",
+                r"HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects",
+                "/v",
+                "VisualFXSetting",
+                "/t",
+                "REG_DWORD",
+                "/d",
+                "0",
+                "/f",
+            ],
+            check=True,
+            stdout=subprocess.DEVNULL,
+        )
+    else:
+        get_visualsetting = subprocess.run(  # Get the value of VisualFXSetting registry (best performance = 2)
             [
                 "powershell",
                 "-command",
-                r'Start-Process -FilePath "$env:SystemRoot\system32\SystemPropertiesPerformance.exe"; Start-Sleep -Seconds 1.5; Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait("{DOWN}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{DOWN}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}")',
+                r'Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting"',
             ],
-            check=True,
+            capture_output=True,
+            text=True,
         )
+        visualsetting = get_visualsetting.stdout.strip().splitlines()[0]
+        if "2" not in visualsetting:
+            subprocess.run(  # Adust for Best Performance
+                [
+                    "powershell",
+                    "-command",
+                    r'Start-Process -FilePath "$env:SystemRoot\system32\SystemPropertiesPerformance.exe"; Start-Sleep -Seconds 1.5; Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait("{DOWN}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{DOWN}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}")',
+                ],
+                check=True,
+            )
     subprocess.run(  # Turn off Automatically manage paging file size
         [
             "wmic",
