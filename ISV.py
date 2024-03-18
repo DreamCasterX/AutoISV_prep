@@ -309,7 +309,7 @@ def case_07():
     sb_state = get_sb_state.stdout.strip()
     if sb_state.lower() == "true":
         print("Secure boot is enabled!! Enter BIOS to disable Secure boot first")
-        os.sytem("pause")
+        os.system("pause")
         sys.exit()
     else:
         try:
@@ -343,7 +343,7 @@ def case_08():
         print(
             f"#8 - Failed to copy PowerConfig folder and import power scheme!!\nError: {error}"
         )
-        os.sytem("pause")
+        os.system("pause")
         sys.exit()
 
 
