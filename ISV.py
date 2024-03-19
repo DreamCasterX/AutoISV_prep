@@ -689,7 +689,7 @@ def case_19():
             MS_blacklist.append(item.strip())
     print("Uninstalling the follow apps: ")
     for index, app in enumerate(MS_blacklist, 1):
-        print(f"    {index}. {app}")
+        print(f"    ({index}) {app}")
     for MS_app in MS_blacklist:
         subprocess.run(
             [
@@ -737,7 +737,7 @@ def case_20():
             HP_blacklist.append(item.strip())
     print("Uninstalling the follow apps: ")
     for index, app in enumerate(HP_blacklist, 1):
-        print(f"    {index}. {app}")
+        print(f"    ({index}) {app}")
     for HP_app in HP_blacklist:
         subprocess.run(
             [
