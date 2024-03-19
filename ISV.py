@@ -692,7 +692,15 @@ def case_19():
         print(f"    {index}. {app}")
     for MS_app in MS_blacklist:
         subprocess.run(
-            ["wmic", "product", "where", f"name='{MS_app}'", "call", "uninstall"],
+            [
+                "wmic",
+                "product",
+                "where",
+                f"name='{MS_app}'",
+                "call",
+                "uninstall",
+                "/nointeractive",
+            ],
             shell=True,
             check=True,
             stderr=subprocess.DEVNULL,
@@ -732,7 +740,15 @@ def case_20():
         print(f"    {index}. {app}")
     for HP_app in HP_blacklist:
         subprocess.run(
-            ["wmic", "product", "where", f"name='{HP_app}'", "call", "uninstall"],
+            [
+                "wmic",
+                "product",
+                "where",
+                f"name='{HP_app}'",
+                "call",
+                "uninstall",
+                "/nointeractive",
+            ],
             shell=True,
             check=True,
             stderr=subprocess.DEVNULL,
