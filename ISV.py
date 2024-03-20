@@ -31,7 +31,7 @@ def warning_before(func):
     def inner(*args, **kwargs):
         while True:
             answer = input(
-                "\n<Attention> Do not interact with desktop from now on. Ready for the next case? (y/n) "
+                "\n\033[33m<Attention> Do not interact with desktop from now on. Ready for the next case? (y/n) \033[0m"
             )
             if answer.lower() == "y":
                 break
@@ -77,7 +77,7 @@ def case_01():
     error_devices = get_error_devices.stdout.strip().splitlines()
     if error_devices:
         print(
-            "#1 - YB found in device manager!! Please look into the problematic device(s):\n"
+            "\033[31m#1 - YB found in device manager!! Please look into the problematic device(s):\033[0m\n"
         )
         for device in error_devices:
             print(device)
@@ -116,7 +116,7 @@ def case_02():
         DPTF_status = get_DPTF_status.stdout.strip()
         if "Unknown" in DPTF_status:
             print(
-                "#2 - Intel DPTF is supported but NOT enabled!! Please enter BIOS to enable it"
+                "\033[31m#2 - Intel DPTF is supported but NOT enabled!! Please enter BIOS to enable it\033[0m"
             )
             os.system("pause")
             sys.exit()
@@ -209,7 +209,9 @@ def case_03():
                 )
                 print("#3 - <DT> Set power plan as High performance [Complete]")
         if "High performance" not in power_plan_all_string:
-            print("#3 - <DT> Power plan for High performance is not availalbe!!")
+            print(
+                "\033[31m#3 - <DT> Power plan for High performance is not availalbe!!\033[0m"
+            )
             os.sytem("pause")
             sys.exit()
 
@@ -296,7 +298,9 @@ def case_06():
         os.system(f'reg import \"{reg_file_path}\" > nul 2>&1')  # fmt: skip
         print("#6 - Add RT Click Options registry [Complete]")
     except OSError as error:
-        print(f"#6 - Failed to add RT Click Options registry!!\nError: {error}")
+        print(
+            f"\033[31m#6 - Failed to add RT Click Options registry!!\033[0m\nError: {error}"
+        )
         os.sytem("pause")
         sys.exit()
 
@@ -308,7 +312,9 @@ def case_07():
     )
     sb_state = get_sb_state.stdout.strip()
     if sb_state.lower() == "true":
-        print("Secure boot is enabled!! Enter BIOS to disable Secure boot first")
+        print(
+            "\033[31mSecure boot is enabled!! Enter BIOS to disable Secure boot first\033[0m"
+        )
         os.system("pause")
         sys.exit()
     else:
@@ -320,7 +326,7 @@ def case_07():
             )
             print("#7 - Enable test mode [Complete]")
         except subprocess.CalledProcessError as error:
-            print(f"#7 - Failed to enable test mode!!\nError:{error}")
+            print(f"\033[31m#7 - Failed to enable test mode!!\033[0m\nError:{error}")
             os.sytem("pause")
             sys.exit()
 
@@ -341,7 +347,7 @@ def case_08():
         print("#8 - Copy PowerConfig folder and import power scheme [Complete]")
     except subprocess.CalledProcessError as error:
         print(
-            f"#8 - Failed to copy PowerConfig folder and import power scheme!!\nError: {error}"
+            f"\033[31m#8 - Failed to copy PowerConfig folder and import power scheme!!\033[0m\nError: {error}"
         )
         os.system("pause")
         sys.exit()
@@ -594,6 +600,9 @@ def case_15():
 
 # TODO: Turn off all messages in Security and Maintenance settings (#16)
 def case_16():
+    os.system("wscui.cpl")
+    # Hide security notifications
+
     print("#16 - Turn off Security and Maintenance messages [Complete]")
 
 
@@ -1131,7 +1140,7 @@ def case_24():
             f'wmic pagefileset where name="{pagefile}" set InitialSize={init_memory_size*1000},MaximumSize={max_memory_size*1000} > nul 2>&1'
         )
     except:
-        print("Failed to create pagefile!!")
+        print("\033[31m#24 - Failed to create pagefile!!\033[0m")
         os.system("pause")
         sys.exit()
     subprocess.run(  # Turn off System Protection
@@ -1326,7 +1335,6 @@ case_12()
 case_13()
 case_14()
 case_15()
-case_16()
 case_17()
 case_18()
 case_19()
@@ -1338,10 +1346,13 @@ case_25()
 case_26()
 case_27()
 case_28()
+case_16()
 
 print("===============================================================")
 while True:
-    answer = input("\nAll done! Restart the system to take effect changes now? (y/n)\n")
+    answer = input(
+        "\n\033[32mAll done! Restart the system to take effect changes now? (y/n) \033[0m"
+    )
     if answer.lower() == "y":
         os.system("shutdown /r /t 1")
         break
