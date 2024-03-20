@@ -1,21 +1,10 @@
-WinZip
-Adobe Acrobate
-HP Sure Sense Installer
-HP Sure Shield AI
-HP Sure Run
 HP Sure Run Module
 HP Sure Recover
 HP Support Assistant
 HP Notifications
-HP Jumpstarts
-HP Drive Encryption
-HP Client Security Manager
-HP Caller Dashboard
-HP Sure Click
 HP Documentation
 HP Wolf Security
 HP Wolf Security - Console
-HP Wolf Security Application Support for Sure Sense
 HP Security Update Service
 HP Connection Optimizer
 myHP

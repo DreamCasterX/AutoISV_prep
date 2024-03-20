@@ -57,7 +57,7 @@ print(
     r"""
  _____________________________________
   ISV Benchmark System-Prep Auto Tool 
-                  v1.2 
+                  v1.3 
  =====================================
 """
 )
@@ -250,9 +250,9 @@ def case_04():
             ],
             check=True,
         )
-        subprocess.run(
+        subprocess.run(  # Turn off BT
             ["powershell.exe", "-File", app_path, "-BluetoothStatus", "Off"], check=True
-        )  # Turn off BT
+        )
         subprocess.run(  # Reset to the default execution policy
             [
                 "powershell",
@@ -706,12 +706,35 @@ def case_19():
             stderr=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL,
         )
+    app_path = "./src/app/M365.ps1"
+    get_default_policy = subprocess.run(
+        ["powershell", "Get-ExecutionPolicy"], capture_output=True, text=True
+    )
+    default_policy = get_default_policy.stdout.strip()
+    subprocess.run(  # Change execution policy to allow running powershell script
+        [
+            "powershell",
+            "Set-ExecutionPolicy RemoteSigned",
+        ],
+        check=True,
+    )
+    subprocess.run(  # Uninstall Microsoft 365/Microsoft OneNote
+        ["powershell.exe", "-File", app_path], check=True
+    )
+    subprocess.run(  # Reset to the default execution policy
+        [
+            "powershell",
+            f"Set-ExecutionPolicy {default_policy}",
+        ],
+        check=True,
+    )
     print("#19 - Uninsalled MS Office and related apps [Complete]")
 
 
 # Uninstall HP apps (#20)
 # wmic product get name | findstr "HP"
 def case_20():
+    app_path = "./src/app/HPmis.ps1"
     subprocess.run(  # Uninstall HP Support Assistant UWP app
         [
             "powershell",
@@ -754,6 +777,27 @@ def case_20():
             stderr=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL,
         )
+    get_default_policy = subprocess.run(
+        ["powershell", "Get-ExecutionPolicy"], capture_output=True, text=True
+    )
+    default_policy = get_default_policy.stdout.strip()
+    subprocess.run(  # Change execution policy to allow running powershell script
+        [
+            "powershell",
+            "Set-ExecutionPolicy RemoteSigned",
+        ],
+        check=True,
+    )
+    subprocess.run(  # Uninstall HP Connection Optimizer/HP Documentation
+        ["powershell.exe", "-File", app_path], check=True
+    )
+    subprocess.run(  # Reset to the default execution policy
+        [
+            "powershell",
+            f"Set-ExecutionPolicy {default_policy}",
+        ],
+        check=True,
+    )
     print("#20 - Uninsalled HP apps [Complete]")
 
 
