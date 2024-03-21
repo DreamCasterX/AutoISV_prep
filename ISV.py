@@ -452,10 +452,12 @@ def case_09():
         check=True,
         stdout=subprocess.DEVNULL,
     )
-    os.system(
+    os.system(  # Restart Windows Explorer to take effect changes immediately
         "taskkill /F /IM explorer.exe > nul 2>&1"
-    )  # Restart Windows Explorer to take effect changes immediately
+    )
+    time.sleep(1)
     os.system("start explorer.exe > nul 2>&1")
+    time.sleep(1)
     print(
         "#9 - Display full path/hidden files/empty drives/extensions/merge conflicts/protected OS files [Complete]"
     )
@@ -553,6 +555,7 @@ def case_13():
         check=True,
         stdout=subprocess.DEVNULL,
     )
+    time.sleep(1)
     subprocess.run(  # Ping Snipping Tool
         [
             reg_file_path,
@@ -562,8 +565,11 @@ def case_13():
         check=True,
         stdout=subprocess.DEVNULL,
     )
+    time.sleep(1)
     os.system("taskkill /F /IM explorer.exe > nul 2>&1")  # Restart Windows Explorer
+    time.sleep(1)
     os.system("start explorer.exe > nul 2>&1")
+    time.sleep(1)
     print("#13 - Unpin Edge and pin Paint/Snipping Tool to taskbar [Complete]")
 
 
@@ -598,11 +604,18 @@ def case_15():
     print("#15 - Turn off Windows Firewall [Complete]")
 
 
-# TODO: Turn off all messages in Security and Maintenance settings (#16)
+# Turn off all messages in Security and Maintenance settings (#16)
+@warning_before
+@delay_after
 def case_16():
-    os.system("wscui.cpl")
-    # Hide security notifications
-
+    subprocess.run(  # Open Security and Maintenance Center by KB
+        [
+            "powershell",
+            "-command",
+            r'Start-Process -FilePath "$env:SystemRoot\system32\wscui.cpl"; Start-Sleep -Seconds 1.5; Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("%{F4}")',
+        ],
+        check=True,
+    )
     print("#16 - Turn off Security and Maintenance messages [Complete]")
 
 
@@ -990,7 +1003,6 @@ def case_22():
 
 
 # Set Local Group Policy for Windows Update/Microsoft Defender Antivirus/Internet Explorer (#23)
-@warning_before
 @delay_after
 def case_23():
     subprocess.run(  # Enable "Do not include drivers with WU" for WU
@@ -1340,13 +1352,14 @@ case_18()
 case_19()
 case_20()
 case_22()
+case_16()
 case_23()
 case_24()
 case_25()
 case_26()
 case_27()
 case_28()
-case_16()
+
 
 print("===============================================================")
 while True:
