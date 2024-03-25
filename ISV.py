@@ -17,10 +17,35 @@ def is_admin():
 
 def run_as_admin():
     if not is_admin():
-        # Re-run the script with elevated privileges
-        ctypes.windll.shell32.ShellExecuteW(
-            None, "runas", sys.executable, " ".join(sys.argv), None, 1
+        print(
+            r"""      
+   _________________________________________________
+ /                                                   \
+| Please run this tool with Administrator Privileges  |
+|                                                     |
+ \                                                   /
+   =================================================
+                                       \
+                                        \
+                                         ,_     _
+                                         |\\_,-~/
+                                         / _  _ |    ,--.
+                                        (  @  @ )   / ,-'
+                                         \  _T_/-._( (
+                                         /         `. \
+                                        |         _  \ |
+                                         \ \ ,  /      |
+                                          || |-_\__   /
+                                         ((_/`(____,-'
+        
+        """
         )
+        os.system("pause")
+        sys.exit()
+        ## Re-run the script with elevated privileges
+        # ctypes.windll.shell32.ShellExecuteW(
+        #     None, "runas", sys.executable, " ".join(sys.argv), None, 1
+        # )
 
 
 run_as_admin()
@@ -57,7 +82,7 @@ print(
     r"""
  _____________________________________
   ISV Benchmark System-Prep Auto Tool 
-                  v1.3 
+                  v1.4 
  =====================================
 """
 )
@@ -161,7 +186,9 @@ def case_03():
             )
             charging_status_string = charging_status.stdout.strip()
             while "1" in charging_status_string:  # Not charging
-                print("#3 - <NB> To set AC power plan, please plug in AC power!!")
+                print(
+                    "\n\033[33m#3 - <NB> To set AC power plan, please plug in AC power!!\n\033[0m"
+                )
                 confirm = input("Are you ready? (y/n) ")
                 if confirm.lower() == "y":
                     break
@@ -612,7 +639,7 @@ def case_16():
         [
             "powershell",
             "-command",
-            r'Start-Process -FilePath "$env:SystemRoot\system32\wscui.cpl"; Start-Sleep -Seconds 1.5; Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("%{F4}")',
+            r'Start-Process -FilePath "$env:SystemRoot\system32\wscui.cpl"; Start-Sleep -Seconds 1.5; Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait("{DOWN}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{DOWN}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{DOWN}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{-}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{TAB}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("%{F4}")',
         ],
         check=True,
     )
@@ -824,11 +851,15 @@ def case_20():
 
 
 # Install .NET Framework 3.5 (#21)
-# TODO: Corp net can't ping google.com
 # Must be run as administrator
 def case_21():
     check_dotnet35_state = subprocess.run(  # Check if .NET Framework 3.5 is installed
-        ["Dism", "/online", "/Get-FeatureInfo", "/FeatureName:NetFx3"],
+        [
+            "Dism",
+            "/online",
+            "/Get-FeatureInfo",
+            "/FeatureName:NetFx3",
+        ],
         capture_output=True,
         text=True,
     )
@@ -846,7 +877,7 @@ def case_21():
             check_internet_string = check_internet.stdout
             while "Ping request could not find host" in check_internet_string:
                 print(
-                    "#21 - To download .NET framework 3.5, please connect to Internet!!"
+                    "\n\033[33m#21 - To download .NET framework 3.5, please connect to Internet!!\n\033[0m"
                 )
                 confirm = input("Are you ready? (y/n) ")
                 if confirm.lower() == "y":
@@ -861,7 +892,7 @@ def case_21():
             [
                 "powershell",
                 "-command",
-                "Enable-WindowsOptionalFeature -FeatureName NetFx3 -Online",
+                "Enable-WindowsOptionalFeature -FeatureName NetFx3 -Online -NoRestart",
             ],
             text=True,
             stdout=subprocess.DEVNULL,
@@ -1352,9 +1383,9 @@ case_18()
 case_19()
 case_20()
 case_22()
-case_16()
-case_23()
-case_24()
+case_16()  # KB control script
+case_23()  # KB control script
+case_24()  # KB control script
 case_25()
 case_26()
 case_27()
