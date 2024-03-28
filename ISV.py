@@ -479,12 +479,16 @@ def case_09():
         check=True,
         stdout=subprocess.DEVNULL,
     )
-    os.system(  # Restart Windows Explorer to take effect changes immediately
-        "taskkill /F /IM explorer.exe > nul 2>&1"
+    time.sleep(1)
+    subprocess.run(  # Refresh Windows Explorer to take effect changes
+        [
+            "powershell",
+            "-command",
+            "Stop-Process -Name Explorer",
+        ],
+        check=True,
     )
-    time.sleep(1)
-    os.system("start explorer.exe > nul 2>&1")
-    time.sleep(1)
+    time.sleep(2)
     print(
         "#9 - Display full path/hidden files/empty drives/extensions/merge conflicts/protected OS files [Complete]"
     )
@@ -565,10 +569,9 @@ def case_12():
 
 
 # Unpin Edge and pin Paint/Snipping Tool to taskbar (#13)
+@warning_before
 @delay_after
 def case_13():
-    reg_file_path = "./src/app/syspin.exe"
-    app_path = os.environ.get("LocalAppData")
     subprocess.run(  # Unping Edge
         [
             "powershell",
@@ -577,26 +580,33 @@ def case_13():
         ],
         check=True,
     )
-    subprocess.run(  # Ping Paint
-        [reg_file_path, f"{app_path}\\Microsoft\\WindowsApps\\mspaint.exe", "5386"],
-        check=True,
-        stdout=subprocess.DEVNULL,
-    )
-    time.sleep(1)
-    subprocess.run(  # Ping Snipping Tool
+    time.sleep(2)
+    subprocess.run(  # Refresh Windows Explorer to take effect changes
         [
-            reg_file_path,
-            f"{app_path}\\Microsoft\\WindowsApps\\SnippingTool.exe",
-            "5386",
+            "powershell",
+            "-command",
+            "Stop-Process -Name Explorer",
         ],
         check=True,
-        stdout=subprocess.DEVNULL,
     )
-    time.sleep(1)
-    os.system("taskkill /F /IM explorer.exe > nul 2>&1")  # Restart Windows Explorer
-    time.sleep(1)
-    os.system("start explorer.exe > nul 2>&1")
-    time.sleep(1)
+    time.sleep(5)  # Need to increase delay time if ping paint fails
+    subprocess.run(  # Ping Paint
+        [
+            "powershell",
+            "-command",
+            r'Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait("^{ESC}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("paint"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{RIGHT}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{DOWN}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{DOWN}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{DOWN}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{ESC}")',
+        ],
+        check=True,
+    )
+    time.sleep(2)
+    subprocess.run(  # Ping Snipping Tool
+        [
+            "powershell",
+            "-command",
+            r'Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait("^{ESC}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("snipping"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{RIGHT}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{DOWN}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{DOWN}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{DOWN}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{DOWN}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{DOWN}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{UP}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{UP}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{UP}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{UP}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{UP}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{ENTER}"); Start-Sleep -Milliseconds 300; [System.Windows.Forms.SendKeys]::SendWait("{ESC}")',
+        ],
+        check=True,
+    )
     print("#13 - Unpin Edge and pin Paint/Snipping Tool to taskbar [Complete]")
 
 
@@ -632,7 +642,6 @@ def case_15():
 
 
 # Turn off all messages in Security and Maintenance settings (#16)
-@warning_before
 @delay_after
 def case_16():
     subprocess.run(  # Open Security and Maintenance Center by KB
@@ -1375,7 +1384,6 @@ case_09()
 case_10()
 case_11()
 case_12()
-case_13()
 case_14()
 case_15()
 case_17()
@@ -1383,6 +1391,7 @@ case_18()
 case_19()
 case_20()
 case_22()
+case_13()  # KB control script
 case_16()  # KB control script
 case_23()  # KB control script
 case_24()  # KB control script
