@@ -4,6 +4,8 @@ import shutil
 import os
 import ctypes
 import time
+import json
+import requests
 
 
 # Force users to run the tool as administrator
@@ -21,8 +23,8 @@ def run_as_admin():
             r"""      
    _________________________________________________
  /                                                   \
-| Please run this tool with Administrator Privileges  |
-|                                                     |
+|  Please right-click on this app and run with        |
+|  Administrator Privileges                           |
  \                                                   /
    =================================================
                                        \
@@ -82,7 +84,7 @@ print(
     r"""
  _____________________________________
   ISV Benchmark System-Prep Auto Tool 
-                  v1.4 
+                  v1.5 
  =====================================
 """
 )
@@ -897,6 +899,18 @@ def case_21():
                     continue
             else:
                 break
+        # Adjust real local Taipei date and time        
+        taipei_url = "https://worldtimeapi.org/api/timezone/Asia/Taipei.json"
+        response = requests.get(taipei_url)
+        taipei_datetime_dict = json.loads(response.text)["datetime"]
+        taipei_date = taipei_datetime_dict.split("T")[0]
+        taipei_time = taipei_datetime_dict.split("T")[1].split(".")[0]
+        hour_minute = taipei_time[0:5]
+        year = taipei_date.split("-")[0][2:]
+        month = taipei_date.split("-")[1]
+        day = taipei_date.split("-")[2]
+        os.system(f"date {month}-{day}-{year} > nul 2>&1")  # mm-dd-yy
+        os.system(f"time {hour_minute} > nul 2>&1")  # hh-mm
         subprocess.run(
             [
                 "powershell",
