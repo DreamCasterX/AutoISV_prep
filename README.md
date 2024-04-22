@@ -3,7 +3,7 @@
 
 #### How to use
 1. Unzip and copy the entire folder to desktop
-2. Run `ISV.exe`
+2. Right-click on `ISV.exe` and run as adminstrator 
 
 #
 
@@ -29,7 +29,7 @@
 
 #10 - Set sleep & display off to Never in power option
 
-#11 - Set time zone to Central US and disable auto set time
+#11 - Set time zone to Central US and disable auto set time and set real local Taipei time
 
 #12 - Auto hide the taskbar
 
